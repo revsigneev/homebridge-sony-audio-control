@@ -14,7 +14,7 @@ The plugin doesn't support auto discovery using UPNP. This is by design as the r
 First of all you should already have installed `Homebridge` on your device. Follow the instructions over at the
 [HomeBridge Repo](https://github.com/nfarina/homebridge).
 
-To install the `homebridge-sony-audio-control` plugin simply run `sudo npm install -g homebridge-sony-audio-control`.
+TBD: To install the `homebridge-sony-sounbar-audio-control` plugin simply run `sudo npm install -g homebridge-sony-sounbar-audio-control`.
 
 ### Configuration
 Below is an example configuration that has to amended to your existing Homebridge-configuration.
