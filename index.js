@@ -18,29 +18,31 @@ function SonyAudioControlReceiver(log, config) {
   this.input = {};
   this.power = {};
   this.soundMode = {};
+  this.soundMode = {};
+  this.alarm = {};
   this.inputServices = [];
   this.receiverServices = [];
   this.inputs = config.inputs;
-  this.receiverPowerOnDelay = 200;
-  this.outputZone = "extOutput:zone?zone=1";
+  this.receiverPowerOnDelay = 6000;
+  this.outputZone = "";
   this.baseHttpUrl = "http://" + config.ip + ":10000";
   this.baseWsUrl = "ws://" + config.ip + ":10000";
 
   this.volume.volumeUrl = this.baseHttpUrl + "/sony/audio";
   this.volume.volumeStatusBody = JSON.stringify({
     "method": "getVolumeInformation",
-    "id": 127,
+    "id": 33,
     "params": [{
-      "output": "extOutput:zone?zone=1"
+      "output": ""
     }],
     "version": "1.1"
   });
   this.volume.volumeSetBody = JSON.stringify({
     "method": "setAudioVolume",
-    "id": 127,
+    "id": 98,
     "params": [{
       "volume": "%s",
-      "output": "extOutput:zone?zone=1"
+      "output": ""
     }],
     "version": "1.1"
   });
@@ -49,27 +51,27 @@ function SonyAudioControlReceiver(log, config) {
   this.volume.muteUrl = this.baseHttpUrl + "/sony/audio";
   this.volume.muteStatusBody = JSON.stringify({
     "method": "getVolumeInformation",
-    "id": 127,
+    "id": 33,
     "params": [{
-      "output": "extOutput:zone?zone=1"
+      "output": ""
     }],
     "version": "1.1"
   });
   this.volume.muteOnBody = JSON.stringify({
     "method": "setAudioMute",
-    "id": 127,
+    "id": 601,
     "params": [{
       "mute": "on",
-      "output": "extOutput:zone?zone=1"
+      "output": ""
     }],
     "version": "1.1"
   });
   this.volume.muteOffBody = JSON.stringify({
     "method": "setAudioMute",
-    "id": 127,
+    "id": 601,
     "params": [{
       "mute": "off",
-      "output": "extOutput:zone?zone=1"
+      "output": ""
     }],
     "version": "1.1"
   });
@@ -78,87 +80,85 @@ function SonyAudioControlReceiver(log, config) {
   this.input.url = this.baseHttpUrl + "/sony/avContent";
   this.input.statusBody = JSON.stringify({
     "method": "getPlayingContentInfo",
-    "id": 127,
+    "id": 37,
     "params": [{
-      "output": "extOutput:zone?zone=1"
+      "output": ""
     }],
     "version": "1.2"
   });
   this.input.onBodyBasis = JSON.stringify({
     "method": "setPlayContent",
-    "id": 127,
+    "id": 47,
     "params": [{
-      "output": "extOutput:zone?zone=1",
+      "output": "",
       "uri": "%s"
     }],
     "version": "1.2"
   });
   this.input.offBody = JSON.stringify({
     "method": "setActiveTerminal",
-    "id": 127,
+    "id": 13,
     "params": [{
       "active": "inactive",
-      "uri": "extOutput:zone?zone=1"
+      "uri": ""
     }],
     "version": "1.0"
   });
   this.input.httpMethod = "POST";
 
-  this.power.url = this.baseHttpUrl + "/sony/avContent";
+  this.power.url = this.baseHttpUrl + "/sony/system";
   this.power.statusBody = JSON.stringify({
-    "method": "getCurrentExternalTerminalsStatus",
-    "id": 127,
+    "method": "getPowerStatus",
+    "id": 50,
     "params": [],
-    "version": "1.0"
+    "version": "1.1"
   });
   this.power.onBody = JSON.stringify({
-    "method": "setActiveTerminal",
-    "id": 127,
+    "method": "setPowerStatus",
+    "id": 55,
     "params": [{
-      "active": "active",
-      "uri": "extOutput:zone?zone=1"
+      "status": "active"
     }],
-    "version": "1.0"
+    "version": "1.1"
   });
   this.power.offBody = JSON.stringify({
-    "method": "setActiveTerminal",
-    "id": 127,
+    "method": "setPowerStatus",
+    "id": 55,
     "params": [{
-      "active": "inactive",
-      "uri": "extOutput:zone?zone=1"
+      "status": "off"
     }],
-    "version": "1.0"
+    "version": "1.1"
   });
   this.power.httpMethod = "POST";
 
   this.soundMode.url = this.baseHttpUrl + "/sony/audio";
   this.soundMode.statusBody = JSON.stringify({
     "method": "getSoundSettings",
-    "id": 127,
+    "id": 73,
     "params": [{
       "target": "soundField"
     }],
     "version": "1.1"
   });
-  this.soundMode.stereoValue = "2chStereo";
+  this.soundMode.stereoValue = "standard";
   this.soundMode.stereoOnBody = JSON.stringify({
     "method": "setSoundSettings",
-    "id": 127,
+    "id": 5,
     "params": [{
       "settings": [{
-        "value": "2chStereo",
+        "value": "standard",
         "target": "soundField"
       }]
     }],
     "version": "1.1"
   });
-  this.soundMode.surroundValue = "dolbySurround";
+  this.soundMode.surroundValue = "3dsurround";
   this.soundMode.surroundOnBody = JSON.stringify({
     "method": "setSoundSettings",
-    "id": 127,
+    "id": 5,
     "params": [{
       "settings": [{
-        "value": "dolbySurround",
+        "value": "3dsurround",
         "target": "soundField"
       }]
     }],
@@ -167,6 +167,27 @@ function SonyAudioControlReceiver(log, config) {
   this.soundMode.httpMethod = "POST";
   this.getVolumeInformationNotifcations();
   this.getActiveInputAndOutputNotification();
+
+  this.alarm.url = this.baseHttpUrl + "/sony/avContent";
+  this.alarm.statusBody = JSON.stringify({
+    "method": "getPlayingContentInfo",
+    "id": 37,
+    "params": [{
+      "output": ""
+    }],
+    "version": "1.2"
+  });
+  this.alarm.alarmOnBody = JSON.stringify({
+    "method": "setPlayContent",
+    "id": 47,
+    "params": [{
+      "output": "",
+      "repeatType": "on",
+      "uri": "storage:usb1?path=/intruder_alarm.mp3&storage=usb1"
+    }],
+    "version": "1.2"
+  });
+  this.alarm.httpMethod = "POST";
 }
 
 SonyAudioControlReceiver.prototype = {
@@ -186,7 +207,7 @@ SonyAudioControlReceiver.prototype = {
 
     informationService
       .setCharacteristic(Characteristic.Manufacturer, "Sony")
-      .setCharacteristic(Characteristic.Model, "STR-DN1080")
+      .setCharacteristic(Characteristic.Model, "HT-ST5000")
       .setCharacteristic(Characteristic.SerialNumber, "Serial number 1");
 
     receiverServices.push(informationService);
@@ -249,6 +270,21 @@ SonyAudioControlReceiver.prototype = {
 
     receiverServices.push(stereoService);
 
+
+    this.log("Creating alarm service!");
+    var alarmService = new Service.Switch("Alarm", "Alarm");
+
+    this.log("... configuring alarm characteristic");
+    alarmService
+        .getCharacteristic(Characteristic.On)
+        .on("get", this.getAlarmState.bind(this))
+        .on("set", this.setAlarmState.bind(this));
+
+    this.alarm.service = alarmService;
+
+    receiverServices.push(alarmService);
+
+
     this.log("Creating input services!");
 
     var inputServices = [];
@@ -276,6 +312,10 @@ SonyAudioControlReceiver.prototype = {
       this.inputs[i].service = inputService;
       inputServices.push(inputService);
     }
+
+
+
+
 
     receiverServices = receiverServices.concat(inputServices);
     this.inputServices = inputServices;
@@ -385,7 +425,7 @@ SonyAudioControlReceiver.prototype = {
         body = body.replace("]]", "]");
         var responseBody = JSON.parse(body);
         var responseBodyResult = responseBody.result[0];
-        var currentPowerState = responseBodyResult.active == "active";
+        var currentPowerState = responseBodyResult.status == "active";
         this.log("Speaker is currently %s", currentPowerState ? "ON" : "OFF");
         callback(null, currentPowerState);
       }
@@ -692,6 +732,119 @@ SonyAudioControlReceiver.prototype = {
       }
     }.bind(this));
   },
+
+  getAlarmState: function (callback) {
+    this.log("Getting state of Alarm!");
+    this.power.service.getCharacteristic(Characteristic.On).getValue(this.getAlarmStateFromReceiverIfOnElseReportOff(callback));
+  },
+
+  setAlarmState: function (newAlarmState, callback) {
+    this.log("Setting state of Alarm!");
+    this.power.service.getCharacteristic(Characteristic.On).getValue(this.powerOnReceiverBeforeChangingAlarmStateIfNecessary(newAlarmState, callback, this.alarm.alarmOnBody));
+  },
+
+  getAlarmStateFromReceiverIfOnElseReportOff: function (callback) {
+    this.log("Deciding whether to request Alarm mode from receiver based on power status!");
+    if (this.power.service.getCharacteristic(Characteristic.On).value) {
+     this.log("Getting current Alarm mode from receiver since power is on!");
+
+       this._httpRequest(this.alarm.url, this.alarm.statusBody, "POST", function (error, response, body) {
+           if (error) {
+               this.log("getAlarmState() failed: %s", error.message);
+               callback(error);
+           }
+           else if (response.statusCode !== 200) {
+               this.log("getAlarmState() request returned http error: %s", response.statusCode);
+               callback(new Error("getAlarmState() returned http error " + response.statusCode));
+           }
+           else {
+               body = body.replace("[[", "[");
+               body = body.replace("]]", "]");
+               var responseBody = JSON.parse(body);
+               var currentAlarmState = responseBody.result.uri == "storage:usb1?path=/intruder_alarm.mp3&storage=usb1";
+               this.log("Alarm is currently %s", currentAlarmState? "ON": "OFF");
+               callback(null, currentAlarmState);
+           }
+       }.bind(this));
+    }
+    else {
+     this.log("Reporting off since receiver is off!");
+     callback(null, false);
+    }
+  },
+
+  powerOnReceiverBeforeChangingAlarmStateIfNecessary: function (newAlarmState, callback, alarmOnBody) {
+
+    if (newAlarmState && !this.power.service.getCharacteristic(Characteristic.On).value) {
+
+     this.log("Powering on receiver before setting Alarm!");
+
+     this._httpRequest(this.power.url, this.power.onBody, this.power.httpMethod, function (error, response, body) {
+         if (error) {
+             this.log("setPowerState() failed: %s", error.message);
+             callback(error);
+         }
+         else if (response.statusCode !== 200) {
+             this.log("setPowerState() request returned http error: %s", response.statusCode);
+             callback(new Error("setPowerState() returned http error " + response.statusCode));
+         }
+         else {
+             this.log("setPowerState() successfully set power state to ON");
+             this.sleep(this.receiverPowerOnDelay);
+             for (let i = 0; i < this.inputServices.length; i++) {
+               this.log("Restoring characteristics of input service " + i + " when powering on receiver while setting soundmode!");
+               this.inputServices[i].getCharacteristic(Characteristic.On).getValue();
+             }
+             this.log("Restoring characteristics of volume service when powering on receiver while setting input!");
+             this.volume.service.getCharacteristic(Characteristic.On).getValue();
+             this.volume.service.getCharacteristic(Characteristic.Brightness).getValue();
+             this.setAlarmOnReceiver(newAlarmState, callback, alarmOnBody);
+             this.sleep(this.receiverPowerOnDelay);
+         }
+     }.bind(this));
+    }
+    else {
+     this.setAlarmOnReceiver(newAlarmState, callback, alarmOnBody);
+    }
+  },
+
+  setAlarmOnReceiver: function (newAlarmState, callback, alarmOnBody) {
+    this.log("Setting Alarm on receiver!");
+
+     var requestbody = newAlarmState? alarmOnBody: this.power.offBody;
+     var requestUrl = newAlarmState? this.alarm.url: this.power.url;
+     var requesthttpMethod = newAlarmState? this.alarm.httpMethod: this.power.httpMethod;
+
+     this._httpRequest(requestUrl, requestbody, requesthttpMethod, function (error, response, body) {
+         if (error) {
+             this.log("setAlarm() failed: %s", error.message);
+             callback(error);
+         }
+         else if (response.statusCode !== 200) {
+             this.log("setAlarm() request returned http error: %s", response.statusCode);
+             callback(new Error("setAlarm() returned http error " + response.statusCode));
+         }
+         else {
+             this.log("setAlarm() successfully set Alarm to %s", newAlarmState? "ON": "OFF");
+             callback(undefined, body);
+
+             if (!newAlarmState) {
+               for (let i = 0; i < this.inputServices.length; i++) {
+                 this.log("Setting on characteristics of input service " + i + " to off when powering off receiver using power service!");
+                 this.inputServices[i].getCharacteristic(Characteristic.On).updateValue(false);
+               }
+               this.log("Setting on characteristics of power and volume service to off when powering receiver off using Alarm services!");
+               this.power.service.getCharacteristic(Characteristic.On).updateValue(false);
+               this.volume.service.getCharacteristic(Characteristic.On).updateValue(false);
+
+               this.log("Setting Alarm to off when changing state of Alarm!");
+               //this.alarmService.getCharacteristic(Characteristic.On).updateValue(false);
+             }
+         }
+     }.bind(this));
+  },
+
+
 
   sleep: function (miliseconds) {
     var currentTime = new Date().getTime();

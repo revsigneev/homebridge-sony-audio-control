@@ -1,10 +1,10 @@
 # "homebridge-sony-audio-control" Plugin
-With this plugin you can create HomeKit services to control a Sony STR-DN1080 Audio Video Receiver.
+With this plugin you can create HomeKit services to control a Sony STR-DN1080 Audio Video Receiver or HT-ST5000 Soundbar..
 
 The code for this plugin has originally been forked from [Http Speaker for Homebridge](https://github.com/Supereg/homebridge-http-speaker) authored by Andreas Bauer.
 
 ## Compatibility notice
-This plugin utilizes Sony's [Audio Control API](https://developer.sony.com/develop/audio-control-api/). It has only been tested with a Sony STR-DN1080 Audio Video Receiver, but it may work with other Sony devices that support the API.
+This plugin utilizes Sony's [Audio Control API](https://developer.sony.com/develop/audio-control-api/). It has only been tested with a Sony STR-DN1080 Audio Video Receiver and HT-ST5000 Soundbar, but it may work with other Sony devices that support the API.
 
 The plugin supports powertoggling, volume control including muting, setting sound modes stereo and Dolby Surround and switching configured external inputs.
 
@@ -60,3 +60,27 @@ For every external input you want to enable, you have to add a new input object 
             ]
         }
     ]
+
+
+HT-ST5000:
+    "accessories": [
+        {
+            "accessory": "receiver",
+            "name": "Receiver",
+            "ip": "192.168.x.x",
+            "inputs": [
+              {
+                "name": "TV",
+                "uri": "extInput:tv"
+              },
+              {
+                "name": "Apple TV",
+                "uri": "extInput:hdmi?port=1"
+              },
+              {
+                "name": "HDMI2",
+                "uri": "extInput:hdmi?port=2"
+              }
+            ]
+        }
+    ],
